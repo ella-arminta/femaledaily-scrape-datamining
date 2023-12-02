@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
 
 #D:\Downloads\edgedriver_win64\msedgedriver.exe
 driver = webdriver.Edge()
@@ -24,13 +25,22 @@ driver.get(url)
 # Now, find multiple elements under the located element
 videos = driver.find_elements(By.CLASS_NAME,'style-scope ytd-rich-item-renderer')
 
+video_list = []
+
 for video in videos :
     title = video.find_element(By.XPATH,'.//*[@id="video-title-link"]').text
     views = video.find_element(By.XPATH,'.//*[@id="metadata-line"]/span[1]').text
     when = video.find_element(By.XPATH,'.//*[@id="metadata-line"]/span[2]').text
-    print(title,views,when)
+    vid_item = {
+        'title': title,
+        'views': views,
+        'posted': when
+    }
+    video_list.append(vid_item)
 
+df = pd.DataFrame(video_list)
+print(df)
 # Add an explicit wait
-wait = WebDriverWait(driver, 10)
-element = wait.until(EC.presence_of_element_located((By.XPATH, "//some/xpath")))
+# wait = WebDriverWait(driver, 10)
+# element = wait.until(EC.presence_of_element_located((By.XPATH, "//some/xpath")))
 
