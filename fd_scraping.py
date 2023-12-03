@@ -69,18 +69,32 @@ class FemaleDailyScraper:
         try :
             # product_brand
             product_brand = self.driver.find_element(By.CSS_SELECTOR,'.product-brand').text
+        except Exception as e:
+            product_brand = None
+            pass
+        try :
             # product_name
             product_name = self.driver.find_element(By.CSS_SELECTOR, '.product-name').text
+        except Exception as e:
+            product_name = None
+        
+        try : 
             # subcategory
             category = self.driver.find_element(By.CSS_SELECTOR, '.breadcrumb .breadcrumb-section-text:nth-child(2)').text
+        except Exception as e : 
+            category = None
+
+        try :
             # harga
             harga = self.driver.find_element(By.CSS_SELECTOR, '.product-price').text
+        except Exception as e:      
+            harga = None
+        
+        try :
             # rating
             rating = self.driver.find_element(By.CSS_SELECTOR, '.total p').text
-            
         except Exception as e:
-            print(e)
-            pass
+            rating = None
         
         return {
             'product_brand' : product_brand,
@@ -101,7 +115,10 @@ class FemaleDailyScraper:
         purchasePointDict = {}
         for i in range(1,3):
             self.driver.get(url + str(i))
-            reviews = self.driver.find_elements(By.CSS_SELECTOR, '.review-card')
+            try :
+                reviews = self.driver.find_elements(By.CSS_SELECTOR, '.review-card')
+            except Exception as e:
+                continue
             for r in reviews:
                 try:
                     # purchase poin (paling banyak dilihat dari review), 
@@ -144,13 +161,32 @@ class FemaleDailyScraper:
                 except Exception as e:
                     print(e)
                     pass
-
-        max_umur = max(umurDict, key=umurDict.get)
-        max_skin1 = max(skinType1Dict, key=skinType1Dict.get)
-        max_skin2 = max(skinType2Dict, key=skinType2Dict.get)
-        max_skin3 = max(skinType3Dict, key=skinType3Dict.get)
-        max_purchase_point = max(purchasePointDict, key=purchasePointDict.get)
         
+        try : 
+            max_umur = max(umurDict, key=umurDict.get)
+        except Exception as e:
+            max_umur = None
+        
+        try :
+            max_skin1 = max(skinType1Dict, key=skinType1Dict.get)
+        except Exception as e:
+            max_skin1 = None
+        
+        try :
+            max_skin2 = max(skinType2Dict, key=skinType2Dict.get)
+        except Exception as e:
+            max_skin2 = None
+        
+        try :
+            max_skin3 = max(skinType3Dict, key=skinType3Dict.get)
+        except Exception as e:
+            max_skin3 = None
+
+        try :     
+            max_purchase_point = max(purchasePointDict, key=purchasePointDict.get)
+        except Exception as e : 
+            max_purchase_point = None
+
         return {
             'umur' : max_umur,
             'skin1' : max_skin1,
@@ -161,7 +197,7 @@ class FemaleDailyScraper:
 
     def scrape_data(self):
         # Add an explicit wait
-        element = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '.product-brand')))
+        element = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'body')))
 
         product_info = self.get_product_info()
         reviews = self.get_reviews()
@@ -189,6 +225,12 @@ for prod_url in product_urls:
     scraper = FemaleDailyScraper(prod_url)
     row = scraper.scrape_data()
     print(row)
+    # Append the row to the JSON file
+    with open('scrape_result.json', 'a') as json_file:
+        json.dump(row, json_file)
+        json_file.write(',')  
+        json_file.write('\n')  # Add a newline to separate JSON objects
+
 
     # Convert the data to a DataFrame
     dftemp = pd.DataFrame([row])
