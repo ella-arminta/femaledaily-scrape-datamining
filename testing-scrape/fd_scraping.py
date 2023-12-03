@@ -212,7 +212,10 @@ class FemaleDailyScraper:
     def close_driver(self):
         self.driver.quit()
 
-with open('products_urls_edited.json', 'r') as json_file:
+# with open('products_urls_edited.json', 'r') as json_file: #step 1
+#     product_urls = json.load(json_file)
+        
+with open('products_urls_edited2.json', 'r') as json_file: #step 2
     product_urls = json.load(json_file)
 
 # product_urls = [
