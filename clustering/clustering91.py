@@ -25,7 +25,7 @@ else:
 
 ## PREPROCESSING
 df = pd.DataFrame(data_dict)
-selected_features = ['harga', 'umur', 'skin1']
+selected_features = ['skin1', 'skin3']
 # selected_features = ['product_brand', 'category', 'harga', 'rating', 'umur', 'skin1', 'skin2', 'skin3','purchase_point']
 # selected_features = ['product_brand','skin1', 'category', 'harga']
 
@@ -35,21 +35,11 @@ print('before',df_selected)
 # Convert categorical pakai LabelEncoder and OneHotEncoder
 label_encoder = LabelEncoder()
 one_hot_encoder = OneHotEncoder(sparse_output=False)
-for column in ['skin1','umur']:
+for column in selected_features:
     df_selected.loc[:, column]  = label_encoder.fit_transform(df_selected[column])
 
-# Convert 'harga' to jadi angka (hapus 'Rp.' dan convert to float)
-df_selected.loc[:,'harga'] = df_selected['harga'].replace('[^\d]+', '', regex=True).astype(float)
-print('harga', df_selected['harga'])
-# Normalize column angka
-numerical_features = ['harga']
-scaler = StandardScaler()
-df_selected.loc[:, numerical_features] = scaler.fit_transform(df_selected.loc[:, numerical_features])
-print('after2',df_selected)
-
-
 # Fit KMeans model
-kmeans = KMeans(n_clusters=3, random_state=42, n_init=10, init='k-means++')
+kmeans = KMeans(n_clusters=7, random_state=42, n_init=10, init='k-means++')
 df_selected.loc[:,'cluster'] = kmeans.fit_predict(df_selected)
 
 print('cluster center', kmeans.cluster_centers_)
@@ -77,40 +67,18 @@ plt.show()
 ## Visualisasi Cluster 2D
 centroids = kmeans.cluster_centers_
 print(centroids)
-color = ['red', 'green', 'blue']
+color = ['red', 'green','blue','yellow','purple','pink','orange','black','grey','brown']
 df_selected.loc[:,'color'] = df_selected['cluster'].map(lambda p: color[p])
 plt.figure(figsize=(10,10))
 plt.scatter(
-    df_selected['harga'], 
     df_selected['skin1'], 
+    df_selected['skin3'], 
     c=df_selected['color'])
-plt.scatter(centroids[:,0],centroids[:,2], c='green',s=250)
+# plt.scatter(centroids[:,0],centroids[:,1], c='green',s=250)
+plt.xlabel('skin1')
+plt.ylabel('skin3')
+plt.title('Clustering Visualisation Skin1 and Skin3')
 plt.show()
-
-# Visualisasi Cluster 3D
-labels = kmeans.labels_
-centroids = kmeans.cluster_centers_
-df_selected.loc[:,'labels'] = labels
-trace = go.Scatter3d(
-    x = df_selected['harga'],
-    y = df_selected['skin1'],
-    z = df_selected['umur'],
-    mode = 'markers',
-    marker=dict(color=df_selected['labels'], size=5, line=dict(color=df_selected['labels'], width=12), opacity=0.8)
-)
-data = [trace]
-layout = go.Layout(
-    title = 'Clusters',
-    scene = dict(
-        xaxis = dict(title='harga'),
-        yaxis = dict(title='skin1'),
-        zaxis = dict(title='umur')
-    )
-)
-fig = go.Figure(data=data, layout=layout)
-py.offline.plot(fig)
-plt.show()
-print('done')
 
 
 # Visualisasi TSNE 2D
