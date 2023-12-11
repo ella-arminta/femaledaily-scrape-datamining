@@ -24,8 +24,9 @@ else:
 
 ## PREPROCESSING
 df = pd.DataFrame(data_dict)
-# selected_features = ['product_brand', 'category', 'harga', 'rating', 'umur', 'skin1', 'skin2', 'skin3', 'purchase_point']
-selected_features = ['product_brand','skin1', 'category', 'harga']
+selected_features = ['harga', 'umur', 'skin1']
+# selected_features = ['product_brand', 'category', 'harga', 'rating', 'umur', 'skin1', 'skin2', 'skin3','purchase_point']
+# selected_features = ['product_brand','skin1', 'category', 'harga']
 
 
 df_selected = df[selected_features]
@@ -33,7 +34,7 @@ print('before',df_selected)
 # Convert categorical pakai LabelEncoder and OneHotEncoder
 label_encoder = LabelEncoder()
 one_hot_encoder = OneHotEncoder(sparse_output=False)
-for column in ['product_brand', 'skin1','category']:
+for column in ['skin1','umur']:
     df_selected.loc[:, column]  = label_encoder.fit_transform(df_selected[column])
 
 # Convert 'harga' to jadi angka (hapus 'Rp.' dan convert to float)
@@ -47,7 +48,7 @@ print('after2',df_selected)
 
 
 # Fit KMeans model
-kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10, init='k-means++')
 df_selected.loc[:,'cluster'] = kmeans.fit_predict(df_selected)
 
 print('cluster center', kmeans.cluster_centers_)
@@ -84,7 +85,7 @@ color = ['red', 'green', 'blue']
 df_selected.loc[:,'color'] = df_selected['cluster'].map(lambda p: color[p])
 plt.figure(figsize=(10,10))
 plt.scatter(
-    df_selected['product_brand'], 
+    df_selected['harga'], 
     df_selected['skin1'], 
     c=df_selected['color'])
 # plt.scatter(centroids[:,2],centroids[:,3], c='green',s=250)
@@ -95,9 +96,9 @@ labels = kmeans.labels_
 centroids = kmeans.cluster_centers_
 df_selected.loc[:,'labels'] = labels
 trace = go.Scatter3d(
-    x = df_selected['product_brand'],
+    x = df_selected['harga'],
     y = df_selected['skin1'],
-    z = df_selected['category'],
+    z = df_selected['umur'],
     mode = 'markers',
     marker=dict(color=df_selected['labels'], size=5, line=dict(color=df_selected['labels'], width=12), opacity=0.8)
 )
@@ -105,9 +106,9 @@ data = [trace]
 layout = go.Layout(
     title = 'Clusters',
     scene = dict(
-        xaxis = dict(title='product_brand'),
+        xaxis = dict(title='harga'),
         yaxis = dict(title='skin1'),
-        zaxis = dict(title='category')
+        zaxis = dict(title='umur')
     )
 )
 fig = go.Figure(data=data, layout=layout)
